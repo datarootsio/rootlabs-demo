@@ -29,6 +29,7 @@ jobs:
           path: ./src
           dockerfile: ./src/Dockerfile
   terraform:
+    needs: [build-and-push]
     name: 'Terraform'
     runs-on: ubuntu-latest
     steps:
