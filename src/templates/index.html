@@ -1,0 +1,57 @@
+<html>
+<head>
+<style>
+body {background-color: {{ backgroundcolor }};}
+h1   {color: {{ foregroundcolor }};}
+h2   {color: cyan;}
+
+#rainbow {
+            background-color: #FF0000;
+            background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 100%);
+            animation: rainbow 0.63s infinite;
+            position: relative;
+            display: inline-block;
+            width: auto;
+        }
+
+        @keyframes rainbow {
+
+            0%,
+            100% {
+                background-color: #FF0000;
+            }
+
+            16.66% {
+                background-color: #FF00FF;
+            }
+
+            33.33% {
+                background-color: #0000FF;
+            }
+
+            50% {
+                background-color: #00FFFF;
+            }
+
+            66.66% {
+                background-color: #000000;
+            }
+
+            83.33% {
+                background-color: #00FF00;
+            }
+        }
+</style>
+</head>
+<body>
+<h1>Hello {{ name }}</h1>
+{% if environment == 'staging' %}
+<div id="rainbow">
+<h2>YOU ARE IN STAGING</h2>
+</div>
+{% endif %}
+{% if name == 'rick' %}
+<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+{% endif %}
+</body>
+</html>
