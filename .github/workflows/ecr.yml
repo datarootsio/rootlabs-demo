@@ -1,0 +1,22 @@
+name: 'ECR build and package'
+on:
+  push:
+    branches:
+      - '*'
+      - '!master'
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@master
+      - run: cd src
+        shell: bash
+      - uses: kciter/aws-ecr-action@v1
+        with:
+          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+          repo: rootlabs-iac
+          region: eu-west-1
+          tags: staging-latest,${{ GITHUB_RUN_ID }}
