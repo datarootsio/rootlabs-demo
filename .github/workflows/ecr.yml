@@ -19,4 +19,4 @@ jobs:
           account_id: ${{ secrets.AWS_ACCOUNT_ID }}
           repo: rootlabs-iac
           region: eu-west-1
-          tags: staging-latest,${{ GITHUB_RUN_ID }}
+          tags: staging-latest,${{ github.run_id }}
