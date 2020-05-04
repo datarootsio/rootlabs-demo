@@ -1,0 +1,59 @@
+name: 'master pipeline'
+on:
+  push:
+    branches:
+      - 'master'
+env:
+  tf_version: 'latest'
+  tf_working_dir: '.'
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  GOOGLE_APPLICATION_CREDENTIALS: '../.gcp.json'
+  TF_VAR_run_id: ${{ github.run_id }}
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@master
+      - uses: kciter/aws-ecr-action@v1
+        with:
+          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+          repo: rootlabs-iac
+          region: eu-west-1
+          tags: staging-latest,${{ github.run_id }}
+          path: ./src
+          dockerfile: ./src/Dockerfile
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@master
+      - run: 'echo "$GOOGLE_CLOUD_KEYFILE_JSON" > .gcp.json'
+        shell: bash
+        env:
+          GOOGLE_CLOUD_KEYFILE_JSON: ${{secrets.GOOGLE_CLOUD_KEYFILE_JSON}}
+      - name: 'Terraform Init'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: ${{ env.tf_version }}
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: "terraform"
+          args: '-backend-config=environments/staging/backend.tfvars -var-file=environments/staging/variables.tfvars'
+      - name: 'Terraform Apply'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: ${{ env.tf_version }}
+          tf_actions_subcommand: 'apply'
+          tf_actions_working_dir: "terraform"
+          args: '-var-file=environments/staging/variables.tfvars'
+      - name: Tag commit
+        uses: tvdias/github-tagger@v0.0.1
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          tag: "staging-${{ github.run_id }}"
