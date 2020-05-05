@@ -1,6 +1,6 @@
 name: 'tag pipeline'
 on:
-  create:
+  push:
     tags:
       - 'staging-*'
       - 'production-*'
