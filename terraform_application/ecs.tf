@@ -67,7 +67,7 @@ resource "aws_lb_target_group" "rootlabs_iac" {
 
 resource "aws_lb_listener_rule" "rootlabs_iac" {
   listener_arn = data.terraform_remote_state.shared.outputs.alb_listener_arn
-  priority     = 99
+  priority     = var.environment == "production" ? 5 : 10
 
   action {
     type             = "forward"
