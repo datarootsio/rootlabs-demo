@@ -2,6 +2,11 @@ variable "domain_name" {
   type = string
 }
 
+variable "dns_zone" {
+  type    = string
+  default = "rootlabs-dataroots-io"
+}
+
 variable "environment" {
   type = string
 }

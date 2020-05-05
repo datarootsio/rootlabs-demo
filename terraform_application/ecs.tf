@@ -56,7 +56,7 @@ resource "aws_ecs_task_definition" "rootlabs_iac" {
 resource "aws_lb_target_group" "rootlabs_iac" {
   name        = "rootlabs-iac-${var.environment}"
   vpc_id      = data.terraform_remote_state.shared.outputs.vpc_id
-  protocol    = "HTTPS"
+  protocol    = "HTTP"
   port        = 8000
   target_type = "ip"
 
@@ -89,8 +89,9 @@ resource "aws_ecs_service" "rootlabs_iac" {
   desired_count   = 1
 
   network_configuration {
-    subnets          = data.terraform_remote_state.shared.outputs.private_subnets_ids
-    assign_public_ip = false
+    subnets          = data.terraform_remote_state.shared.outputs.public_subnets_ids
+    security_groups  = [data.terraform_remote_state.shared.outputs.egress_security_group]
+    assign_public_ip = true
   }
 
   load_balancer {
@@ -103,4 +104,18 @@ resource "aws_ecs_service" "rootlabs_iac" {
     capacity_provider = "FARGATE_SPOT"
     weight            = 100
   }
+}
+
+data "google_dns_managed_zone" "dns_zone" {
+  name = var.dns_zone
+}
+
+resource "google_dns_record_set" "rootlabs_alb" {
+  name = "${var.domain_name}."
+  type = "CNAME"
+  ttl  = 3600
+
+  managed_zone = data.google_dns_managed_zone.dns_zone.name
+
+  rrdatas = ["${data.terraform_remote_state.shared.outputs.alb_dns_name}."]
 }
