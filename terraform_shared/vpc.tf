@@ -22,23 +22,23 @@ resource "aws_internet_gateway" "main" {
 }
 
 resource "aws_subnet" "private" {
-  count = length(data.aws_availability_zones.available.names)
-  vpc_id = aws_vpc.main.id
-  cidr_block = "10.100.${count.index}.0/24"
+  count             = length(data.aws_availability_zones.available.names)
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.100.${count.index}.0/24"
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
-    tags = {
+  tags = {
     Name = "private subnet ${data.aws_availability_zones.available.names[count.index]}"
   }
 }
 
 resource "aws_subnet" "public" {
-  count = length(data.aws_availability_zones.available.names)
-  vpc_id = aws_vpc.main.id
-  cidr_block = "10.100.${count.index + 10}.0/24"
+  count             = length(data.aws_availability_zones.available.names)
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.100.${count.index + 10}.0/24"
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
-    tags = {
+  tags = {
     Name = "public subnet ${data.aws_availability_zones.available.names[count.index]}"
   }
 }
@@ -66,7 +66,7 @@ resource "aws_route" "public_route" {
 }
 
 resource "aws_route_table_association" "public_subnets" {
-  count = length(data.aws_availability_zones.available.names)
+  count          = length(data.aws_availability_zones.available.names)
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
