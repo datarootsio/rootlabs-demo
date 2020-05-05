@@ -22,7 +22,6 @@ jobs:
         shell: bash
         id: get_environment
       - name: Pull from ECR
-        id: ecr
         uses: jwalton/gh-ecr-push@v1
         with:
           access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -33,7 +32,6 @@ jobs:
           direction: pull
       - run: docker --tag rootlabs-iac rootlabs-iac:production-${{ steps.get_environment.outputs.environment }}
       - name: Push to ECR
-        id: ecr
         uses: jwalton/gh-ecr-push@v1
         with:
           access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
