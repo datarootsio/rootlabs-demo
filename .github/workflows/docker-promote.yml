@@ -1,0 +1,42 @@
+name: 'promote docker image'
+on:
+  push:
+    tags:
+      - 'production-*'
+env:
+  tf_version: 'latest'
+  tf_working_dir: '.'
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+jobs:
+  docker-promote:
+    name: 'Promote docker image'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@master
+      - uses: franzdiebold/github-env-vars-action@v1.0.0
+      - run: echo "::set-output name=environment::$(echo $GITHUB_REF_NAME | cut -d- -f1)"
+        shell: bash
+        id: get_environment
+      - name: Pull from ECR
+        id: ecr
+        uses: jwalton/gh-ecr-push@v1
+        with:
+          access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: eu-west-1
+          image: rootlabs-iac:staging-${{ steps.get_environment.outputs.environment }}
+          local-image: rootlabs-iac
+          direction: pull
+      - run: docker --tag rootlabs-iac rootlabs-iac:production-${{ steps.get_environment.outputs.environment }}
+      - name: Push to ECR
+        id: ecr
+        uses: jwalton/gh-ecr-push@v1
+        with:
+          access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: eu-west-1
+          image: rootlabs-iac:production-${{ steps.get_environment.outputs.environment }}
