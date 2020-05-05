@@ -1,8 +1,9 @@
 name: 'master pipeline'
 on:
-  push:
-    branches:
-      - 'master'
+  create:
+    tags:
+      - 'staging-*'
+      - 'production-*'
 env:
   tf_version: 'latest'
   tf_working_dir: '.'
@@ -12,33 +13,16 @@ env:
   AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
   GOOGLE_APPLICATION_CREDENTIALS: '../.gcp.json'
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 'Checkout'
-        uses: actions/checkout@master
-      - uses: kciter/aws-ecr-action@v1
-        with:
-          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          account_id: ${{ secrets.AWS_ACCOUNT_ID }}
-          repo: rootlabs-iac
-          region: eu-west-1
-          tags: staging-latest,${{ github.run_id }}
-          path: ./src
-          dockerfile: ./src/Dockerfile
-      - name: Tag commit
-        uses: tvdias/github-tagger@v0.0.1
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: "staging-${{ github.run_id }}"
   terraform:
-    needs: [build-and-push]
     name: 'Terraform'
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
         uses: actions/checkout@master
+      - uses: franzdiebold@github-env-vars-action@v1.0.0
+      - run: echo "::set-output name=environment::$(echo $GITHUB_REF_NAME | cut -d- -f1)"
+        shell: bash
+        id: get_environment
       - run: 'echo "$GOOGLE_CLOUD_KEYFILE_JSON" > .gcp.json'
         shell: bash
         env:
@@ -48,10 +32,14 @@ jobs:
         with:
           tf_actions_version: ${{ env.tf_version }}
           tf_actions_subcommand: 'init'
-          tf_actions_working_dir: "terraform_shared"
+          tf_actions_working_dir: "terraform"
+          args: '-backend-config=environments/${{ steps.get_environment.outputs.environment }}/backend.tfvars -var-file=environments/${{ steps.get_environment.outputs.environment }}/variables.tfvars'
       - name: 'Terraform Apply'
         uses: hashicorp/terraform-github-actions@master
+        env:
+          TF_VAR_image_tag: ${{ env.GITHUB_REF_NAME }}
         with:
           tf_actions_version: ${{ env.tf_version }}
           tf_actions_subcommand: 'apply'
-          tf_actions_working_dir: "terraform_shared"
+          tf_actions_working_dir: "terraform"
+          args: '-var-file=environments/${{ steps.get_environment.outputs.environment }}/variables.tfvars'
