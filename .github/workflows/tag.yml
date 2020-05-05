@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: 'Checkout'
         uses: actions/checkout@master
-      - uses: franzdiebold@github-env-vars-action@v1.0.0
+      - uses: franzdiebold/github-env-vars-action@v1.0.0
       - run: echo "::set-output name=environment::$(echo $GITHUB_REF_NAME | cut -d- -f1)"
         shell: bash
         id: get_environment
