@@ -9,9 +9,10 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
   GOOGLE_APPLICATION_CREDENTIALS: '../.gcp.json'
+  TF_VAR_image_tag: "staging-latest"
 jobs:
-  terraform:
-    name: 'Terraform'
+  terraform_shared:
+    name: 'Terraform Shared'
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
@@ -25,24 +26,58 @@ jobs:
         with:
           tf_actions_version: ${{ env.tf_version }}
           tf_actions_subcommand: 'fmt'
-          tf_actions_working_dir: "terraform"
+          tf_actions_working_dir: "terraform_shared"
       - name: 'Terraform Init'
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: ${{ env.tf_version }}
           tf_actions_subcommand: 'init'
-          tf_actions_working_dir: "terraform"
+          tf_actions_working_dir: "terraform_shared"
+      - name: 'Terraform Validate'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: ${{ env.tf_version }}
+          tf_actions_subcommand: 'validate'
+          tf_actions_working_dir: "terraform_shared"
+      - name: 'Terraform Plan'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: ${{ env.tf_version }}
+          tf_actions_subcommand: 'plan'
+          tf_actions_working_dir: "terraform_shared"
+  terraform:
+    name: 'Terraform Application'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@master
+      - run: 'echo "$GOOGLE_CLOUD_KEYFILE_JSON" > .gcp.json'
+        shell: bash
+        env:
+          GOOGLE_CLOUD_KEYFILE_JSON: ${{secrets.GOOGLE_CLOUD_KEYFILE_JSON}}
+      - name: 'Terraform Format'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: ${{ env.tf_version }}
+          tf_actions_subcommand: 'fmt'
+          tf_actions_working_dir: "terraform_application"
+      - name: 'Terraform Init'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: ${{ env.tf_version }}
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: "terraform_application"
           args: '-backend-config=environments/staging/backend.tfvars -var-file=environments/staging/variables.tfvars'
       - name: 'Terraform Validate'
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: ${{ env.tf_version }}
           tf_actions_subcommand: 'validate'
-          tf_actions_working_dir: "terraform"
+          tf_actions_working_dir: "terraform_application"
       - name: 'Terraform Plan'
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: ${{ env.tf_version }}
           tf_actions_subcommand: 'plan'
-          tf_actions_working_dir: "terraform"
+          tf_actions_working_dir: "terraform_application"
           args: '-var-file=environments/staging/variables.tfvars'

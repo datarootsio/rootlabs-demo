@@ -13,3 +13,7 @@ variable "fg_color" {
 variable "bg_color" {
   type = string
 }
+
+variable "image_tag" {
+  type = string
+}
