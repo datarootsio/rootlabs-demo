@@ -75,18 +75,17 @@ resource "aws_vpc_endpoint" "logs" {
   vpc_id            = aws_vpc.main.id
   service_name      = "com.amazonaws.eu-west-1.logs"
   vpc_endpoint_type = "Interface"
-}
-
-resource "aws_vpc_endpoint" "s3" {
-  vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.eu-west-1.s3"
-  vpc_endpoint_type = "Interface"
 
   security_group_ids = [
     aws_security_group.https_from_any.id
   ]
 
   private_dns_enabled = true
+}
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.eu-west-1.s3"
 }
 
 resource "aws_vpc_endpoint" "ecr_dkr" {
