@@ -51,7 +51,7 @@ jobs:
           path: ./src
           dockerfile: ./src/Dockerfile
   tag_release:
-    needs: [terraform]
+    needs: [build-and-push]
     name: "Tag release"
     runs-on: ubuntu-latest
     steps:
