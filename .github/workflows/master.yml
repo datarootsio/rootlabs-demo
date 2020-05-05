@@ -27,11 +27,6 @@ jobs:
           tags: staging-latest,${{ github.run_id }}
           path: ./src
           dockerfile: ./src/Dockerfile
-      - name: Tag commit
-        uses: tvdias/github-tagger@v0.0.1
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: "staging-${{ github.run_id }}"
   terraform:
     needs: [build-and-push]
     name: 'Terraform'
@@ -55,3 +50,13 @@ jobs:
           tf_actions_version: ${{ env.tf_version }}
           tf_actions_subcommand: 'apply'
           tf_actions_working_dir: "terraform_shared"
+  tag_release:
+    needs: [terraform]
+    name: "Tag release"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tag commit
+        uses: tvdias/github-tagger@v0.0.1
+        with:
+          repo-token: "${{ secrets.PAT }}"
+          tag: "staging-${{ github.run_id }}"
