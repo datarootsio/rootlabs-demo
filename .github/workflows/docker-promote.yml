@@ -18,23 +18,23 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@master
       - uses: franzdiebold/github-env-vars-action@v1.0.0
-      - run: echo "::set-output name=environment::$(echo $GITHUB_REF_NAME | cut -d- -f1)"
+      - run: echo "::set-output name=version::$(echo $GITHUB_REF_NAME | cut -d- -f2)"
         shell: bash
-        id: get_environment
+        id: get_version
       - name: Pull from ECR
         uses: jwalton/gh-ecr-push@v1
         with:
           access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           region: eu-west-1
-          image: rootlabs-iac:staging-${{ steps.get_environment.outputs.environment }}
+          image: rootlabs-iac:staging-${{ steps.get_version.outputs.version }}
           local-image: rootlabs-iac
           direction: pull
-      - run: docker --tag rootlabs-iac rootlabs-iac:production-${{ steps.get_environment.outputs.environment }}
+      - run: docker --tag rootlabs-iac rootlabs-iac:production-${{ steps.get_version.outputs.version }}
       - name: Push to ECR
         uses: jwalton/gh-ecr-push@v1
         with:
           access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           region: eu-west-1
-          image: rootlabs-iac:production-${{ steps.get_environment.outputs.environment }}
+          image: rootlabs-iac:production-${{ steps.get_version.outputs.version }}
