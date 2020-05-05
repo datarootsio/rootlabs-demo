@@ -72,8 +72,9 @@ resource "aws_route_table_association" "public_subnets" {
 }
 
 resource "aws_vpc_endpoint" "logs" {
-  vpc_id       = aws_vpc.main.id
-  service_name = "com.amazonaws.eu-west-1.logs"
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.eu-west-1.logs"
+  vpc_endpoint_type = "Interface"
 }
 
 resource "aws_vpc_endpoint" "s3" {
@@ -82,6 +83,7 @@ resource "aws_vpc_endpoint" "s3" {
 }
 
 resource "aws_vpc_endpoint" "ecr_dkr" {
-  vpc_id       = aws_vpc.main.id
-  service_name = "com.amazonaws.eu-west-1.ecr.dkr"
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.eu-west-1.ecr.dkr"
+  vpc_endpoint_type = "Interface"
 }

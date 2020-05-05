@@ -12,23 +12,7 @@ env:
   AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
   GOOGLE_APPLICATION_CREDENTIALS: '../.gcp.json'
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 'Checkout'
-        uses: actions/checkout@master
-      - uses: kciter/aws-ecr-action@v1
-        with:
-          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          account_id: ${{ secrets.AWS_ACCOUNT_ID }}
-          repo: rootlabs-iac
-          region: eu-west-1
-          tags: staging-latest,${{ github.run_id }}
-          path: ./src
-          dockerfile: ./src/Dockerfile
   terraform:
-    needs: [build-and-push]
     name: 'Terraform'
     runs-on: ubuntu-latest
     steps:
@@ -50,8 +34,24 @@ jobs:
           tf_actions_version: ${{ env.tf_version }}
           tf_actions_subcommand: 'apply'
           tf_actions_working_dir: "terraform_shared"
-  tag_release:
+  build-and-push:
     needs: [terraform]
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@master
+      - uses: kciter/aws-ecr-action@v1
+        with:
+          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+          repo: rootlabs-iac
+          region: eu-west-1
+          tags: staging-latest,${{ github.run_id }}
+          path: ./src
+          dockerfile: ./src/Dockerfile
+  tag_release:
+    needs: [build-and-push]
     name: "Tag release"
     runs-on: ubuntu-latest
     steps:
