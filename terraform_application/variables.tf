@@ -3,7 +3,7 @@ variable "domain_name" {
 }
 
 variable "dns_zone" {
-  type = string
+  type    = string
   default = "rootlabs-dataroots-io"
 }
 

@@ -111,9 +111,9 @@ data "google_dns_managed_zone" "dns_zone" {
 }
 
 resource "google_dns_record_set" "rootlabs_alb" {
-  name  = "${var.domain_name}."
-  type  = "CNAME"
-  ttl   = 3600
+  name = "${var.domain_name}."
+  type = "CNAME"
+  ttl  = 3600
 
   managed_zone = data.google_dns_managed_zone.dns_zone.name
 
