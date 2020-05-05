@@ -70,3 +70,18 @@ resource "aws_route_table_association" "public_subnets" {
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
+
+resource "aws_vpc_endpoint" "logs" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.eu-west-1.logs"
+}
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.eu-west-1.s3"
+}
+
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.eu-west-1.ecr.dkr"
+}
