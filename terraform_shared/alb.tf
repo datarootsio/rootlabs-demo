@@ -16,11 +16,29 @@ resource "aws_security_group" "https_from_any" {
   }
 }
 
+resource "aws_security_group" "to_internal_traffic" {
+  name        = "to_internal_traffic"
+  description = "Allow LB to contact internal resources"
+  vpc_id      = aws_vpc.main.id
+
+  egress {
+    description = "Internal access from LB"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["10.100.0.0/16"]
+  }
+
+  tags = {
+    Name = "to_internal_traffic"
+  }
+}
+
 resource "aws_lb" "rootlabs_iac" {
   name               = "rootlabs-iac"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.https_from_any.id]
+  security_groups    = [aws_security_group.https_from_any.id, aws_security_group.to_internal_traffic.id]
   subnets            = aws_subnet.public.*.id
 
   enable_deletion_protection = true
@@ -41,15 +59,4 @@ resource "aws_lb_listener" "rootlabs_iac" {
       status_code  = "404"
     }
   }
-}
-
-resource "google_dns_record_set" "rootlabs_alb" {
-  count = length(var.dns_names)
-  name  = "${var.dns_names[count.index]}."
-  type  = "CNAME"
-  ttl   = 3600
-
-  managed_zone = data.google_dns_managed_zone.dns_zone.name
-
-  rrdatas = ["${aws_lb.rootlabs_iac.dns_name}."]
 }

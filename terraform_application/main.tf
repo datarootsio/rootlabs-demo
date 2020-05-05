@@ -1,3 +1,8 @@
+provider "google" {
+  project = "dataroots-dns"
+  region  = "europe-west1"
+}
+
 provider "aws" {
   region = "eu-west-1"
 }
