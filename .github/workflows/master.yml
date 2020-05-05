@@ -47,7 +47,7 @@ jobs:
           account_id: ${{ secrets.AWS_ACCOUNT_ID }}
           repo: rootlabs-iac
           region: eu-west-1
-          tags: staging-latest,${{ github.run_id }}
+          tags: staging-latest,staging-${{ github.run_id }}
           path: ./src
           dockerfile: ./src/Dockerfile
   tag_release:
