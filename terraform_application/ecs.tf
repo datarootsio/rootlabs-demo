@@ -85,7 +85,7 @@ resource "aws_ecs_service" "rootlabs_iac" {
   name            = "rootlabs-iac-${var.environment}"
   cluster         = aws_ecs_cluster.rootlabs.id
   task_definition = aws_ecs_task_definition.rootlabs_iac.id
-  desired_count   = 1
+  desired_count   = 3
 
   network_configuration {
     subnets          = data.terraform_remote_state.shared.outputs.public_subnets_ids
