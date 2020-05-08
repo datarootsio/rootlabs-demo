@@ -3,7 +3,7 @@ import os
 
 app = Flask(__name__)
 
-@app.route('/', defaults={'name': 'World'})
+@app.route('/', defaults={'name': 'world'})
 @app.route('/<string:name>')
 def index(name):
     return render_template('index.html',
