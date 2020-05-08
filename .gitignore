@@ -2,3 +2,4 @@
 __pycache__
 .env.list
 .idea
+.DS_Store
