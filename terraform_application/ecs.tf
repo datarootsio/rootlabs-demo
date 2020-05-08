@@ -53,6 +53,18 @@ resource "aws_ecs_task_definition" "rootlabs_iac" {
   TASK_DEFINITION
 }
 
+resource "aws_lb_target_group" "rootlabs_iac" {
+  name        = "rootlabs-iac-${var.environment}"
+  vpc_id      = data.terraform_remote_state.shared.outputs.vpc_id
+  protocol    = "HTTP"
+  port        = 8000
+  target_type = "ip"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "aws_lb_listener_rule" "rootlabs_iac" {
   listener_arn = data.terraform_remote_state.shared.outputs.alb_listener_arn
   priority     = var.environment == "production" ? 5 : 10
@@ -69,23 +81,11 @@ resource "aws_lb_listener_rule" "rootlabs_iac" {
   }
 }
 
-resource "aws_lb_target_group" "rootlabs_iac" {
-  name        = "rootlabs-iac-${var.environment}"
-  vpc_id      = data.terraform_remote_state.shared.outputs.vpc_id
-  protocol    = "HTTP"
-  port        = 8000
-  target_type = "ip"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
 resource "aws_ecs_service" "rootlabs_iac" {
   name            = "rootlabs-iac-${var.environment}"
   cluster         = aws_ecs_cluster.rootlabs.id
   task_definition = aws_ecs_task_definition.rootlabs_iac.id
-  desired_count   = 1
+  desired_count   = 3
 
   network_configuration {
     subnets          = data.terraform_remote_state.shared.outputs.public_subnets_ids
