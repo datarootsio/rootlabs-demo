@@ -13,7 +13,7 @@ resource "aws_ecs_cluster" "rootlabs" {
 }
 
 resource "aws_ecs_task_definition" "rootlabs_iac" {
-  family                   = "rootlabs-iac"
+  family                   = "rootlabs-iac-${var.environment}"
   requires_compatibilities = ["FARGATE"]
   cpu                      = 256
   memory                   = 512
