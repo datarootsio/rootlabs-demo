@@ -1,4 +1,4 @@
-##### VARIABLES
+#### VARIABLES
 
 variable "image_id" {
   type = string
@@ -15,6 +15,13 @@ output "instance_ip_addr" {
   value = aws_instance.server.private_ip
 }
 
+
+#### MODULES
+
+module "servers" {
+  source = "./app-cluster"
+  servers = 5
+}
 
 #### DATA SOURCES
 
